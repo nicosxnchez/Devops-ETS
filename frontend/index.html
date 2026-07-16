@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard de Despachos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>Despachos Y VENTAs</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>Dashboard y cosas extra </span>
+        </button>
+        <button class="nav-item" data-view="despachos">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2z"/>
+            <path d="M18 15H6"/>
+            <path d="M15 3v6"/>
+            <path d="M9 3v6"/>
+          </svg>
+          <span>Órdenes de Compra</span>
+        </button>
+        <button class="nav-item" data-view="ordenes-despacho">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22V12"/>
+            <path d="M18 6L12 12L6 6"/>
+            <path d="M2 15H22"/>
+          </svg>
+          <span>Órdenes de Despacho</span>
+        </button>
+        <button class="nav-item" data-view="conductores">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>Conductores</span>
+        </button>
+        <button class="nav-item" data-view="rutas">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Rutas</span>
+        </button>
+        <button class="nav-item" data-view="configuracion">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span>Configuración</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <div class="user-details">
+            <span class="user-name">Admin</span>
+            <span class="user-role">Administrador</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+      <header class="top-header">
+        <button class="menu-toggle" id="menuToggle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="btnNuevoDespacho">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nuevo Despacho
+          </button>
+        </div>
+      </header>
+
+      <section class="content-area" id="contentArea">
+        <!-- Dashboard View -->
+        <div class="view active" id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2z"/>
+                  <path d="M18 15H6"/>
+                  <path d="M15 3v6"/>
+                  <path d="M9 3v6"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="statPedidosPendientes">0</span>
+                <span class="stat-label">Órdenes Pendientes</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22V12"/>
+                  <path d="M18 6L12 12L6 6"/>
+                  <path d="M2 15H22"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="statDespachosHoy">0</span>
+                <span class="stat-label">Despachos Hoy</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="statConductoresActivos">0</span>
+                <span class="stat-label">Conductores Activos</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="statRutasActivas">0</span>
+                <span class="stat-label">Rutas Activas</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3>Últimas Órdenes de Compra</h3>
+                <button class="btn btn-text" data-view="despachos">Ver todas</button>
+              </div>
+              <div class="card-body">
+                <div class="table-container">
+                  <table id="tablaPedidosRecientes">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbodyPedidosRecientes"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Despachos Recientes</h3>
+                <button class="btn btn-text" data-view="ordenes-despacho">Ver todas</button>
+              </div>
+              <div class="card-body">
+                <div class="table-container">
+                  <table id="tablaDespachosRecientes">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Orden Compra</th>
+                        <th>Conductor</th>
+                        <th>Estado</th>
+                        <th>Fecha Salida</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbodyDespachosRecientes"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empresas-section">
+            <h3>Empresas que confían en nosotros</h3>
+            <div class="empresas-logos">
+              <div class="empresa-logo">
+                <div class="logo-placeholder">Transkrizz</div>
+                <span>Transkrizz</span>
+              </div>
+              <div class="empresa-logo">
+                <div class="logo-placeholder">Tuple</div>
+                <span>Tuple</span>
+              </div>
+              <div class="empresa-logo">
+                <div class="logo-placeholder">SunnyCal</div>
+                <span>SunnyCal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Órdenes de Compra View -->
+        <div class="view" id="view-despachos">
+          <div class="card">
+            <div class="card-header">
+              <h3>Órdenes de Compra</h3>
+              <div class="card-actions">
+                <input type="text" class="search-input" id="searchPedidos" placeholder="Buscar órdenes...">
+                <select class="filter-select" id="filterEstadoPedido">
+                  <option value="">Todos los estados</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="procesando">Procesando</option>
+                  <option value="despachado">Despachado</option>
+                  <option value="entregado">Entregado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+                <button class="btn btn-primary" id="btnNuevaOrdenCompra">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Nueva Orden
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table id="tablaPedidos">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Cliente</th>
+                      <th>Contacto</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      <th>Total</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyPedidos"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Órdenes de Despacho View -->
+        <div class="view" id="view-ordenes-despacho">
+          <div class="card">
+            <div class="card-header">
+              <h3>Órdenes de Despacho</h3>
+              <div class="card-actions">
+                <input type="text" class="search-input" id="searchDespachos" placeholder="Buscar despachos...">
+                <select class="filter-select" id="filterEstadoDespacho">
+                  <option value="">Todos los estados</option>
+                  <option value="programado">Programado</option>
+                  <option value="en_ruta">En Ruta</option>
+                  <option value="entregado">Entregado</option>
+                  <option value="fallido">Fallido</option>
+                </select>
+                <button class="btn btn-primary" id="btnNuevoDespachoOrden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Nuevo Despacho
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table id="tablaDespachos">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Orden Compra</th>
+                      <th>Conductor</th>
+                      <th>Vehículo</th>
+                      <th>Estado</th>
+                      <th>Fecha Salida</th>
+                      <th>Fecha Entrega</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyDespachos"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conductores View -->
+        <div class="view" id="view-conductores">
+          <div class="card">
+            <div class="card-header">
+              <h3>Conductores</h3>
+              <div class="card-actions">
+                <input type="text" class="search-input" id="searchConductores" placeholder="Buscar conductores...">
+                <button class="btn btn-primary" id="btnNuevoConductor">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Nuevo Conductor
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table id="tablaConductores">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Licencia</th>
+                      <th>Teléfono</th>
+                      <th>Vehículo Asignado</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyConductores"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rutas View -->
+        <div class="view" id="view-rutas">
+          <div class="card">
+            <div class="card-header">
+              <h3>Rutas</h3>
+              <div class="card-actions">
+                <input type="text" class="search-input" id="searchRutas" placeholder="Buscar rutas...">
+                <button class="btn btn-primary" id="btnNuevaRuta">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Nueva Ruta
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table id="tablaRutas">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Origen</th>
+                      <th>Destino</th>
+                      <th>Distancia (km)</th>
+                      <th>Tiempo Est.</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyRutas"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuración View -->
+        <div class="view" id="view-configuracion">
+          <div class="card">
+            <div class="card-header">
+              <h3>Configuración</h3>
+            </div>
+            <div class="card-body">
+              <div class="config-sections">
+                <div class="config-section">
+                  <h4>Información de la Empresa</h4>
+                  <div class="form-grid">
+                    <div>
+                      <label for="configEmpresaNombre">Nombre</label>
+                      <input type="text" id="configEmpresaNombre" value="Despachos Logistics S.A.">
+                    </div>
+                    <div>
+                      <label for="configEmpresaRuc">RUC</label>
+                      <input type="text" id="configEmpresaRuc" value="20123456789">
+                    </div>
+                    <div>
+                      <label for="configEmpresaDireccion">Dirección</label>
+                      <input type="text" id="configEmpresaDireccion" value="Av. Principal 123, Lima">
+                    </div>
+                    <div>
+                      <label for="configEmpresaTelefono">Teléfono</label>
+                      <input type="text" id="configEmpresaTelefono" value="+51 1 234 5678">
+                    </div>
+                  </div>
+                </div>
+                <div class="config-section">
+                  <h4>Configuración de Despachos</h4>
+                  <div class="form-grid">
+                    <div>
+                      <label for="configTiempoMaximo">Tiempo máximo entrega (hrs)</label>
+                      <input type="number" id="configTiempoMaximo" value="24">
+                    </div>
+                    <div>
+                      <label for="configNotificaciones">Notificaciones automáticas</label>
+                      <select id="configNotificaciones">
+                        <option value="activas" selected>Activas</option>
+                        <option value="inactivas">Inactivas</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="config-actions">
+                  <button class="btn btn-primary" id="btnGuardarConfig">Guardar Cambios</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal para formularios -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nuevo Registro</h3>
+        <button class="modal-close" id="modalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="modalForm">
+          <div class="form-grid" id="modalFormFields"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelarModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarModal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalle -->
+  <div class="modal-overlay" id="modalDetalleOverlay">
+    <div class="modal modal-lg" id="modalDetalle">
+      <div class="modal-header">
+        <h3 id="modalDetalleTitle">Detalle</h3>
+        <button class="modal-close" id="modalDetalleClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalDetalleBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCerrarDetalle">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <footer class="footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22V12"/>
+          <path d="M18 6L12 12L6 6"/>
+          <path d="M2 15H22"/>
+        </svg>
+        <span>Despachos Logistics</span>
+      </div>
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>Condiciones de Servicio</h4>
+          <ul>
+            <li><a href="#">Recomendaciones embalaje</a></li>
+            <li><a href="#">Cobertura</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Síguenos</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">Facebook</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Condiciones de privacidad</a></li>
+            <li><a href="#">Términos & Condiciones</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Despachos Logistics. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

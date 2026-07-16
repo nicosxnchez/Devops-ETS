@@ -1,0 +1,145 @@
+name: CI/CD Despachos EKS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  EKS_NAMESPACE: despachos
+  ECR_REPO_FRONTEND: despachos-frontend
+  ECR_REPO_BACKEND: despachos-backend
+  ECR_REPO_DB: despachos-db
+
+jobs:
+  backend-syntax-check:
+    name: Backend syntax check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        run: npm install
+
+      - name: Validate backend syntax
+        run: node --check server.js
+
+  build-and-deploy:
+    name: Build and deploy to EKS
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Validate AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Define image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Prepare Kubernetes manifests
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          find k8s -type f -name "*.yaml" -exec sed -i "s|{{ECR_URL}}|$ECR_REGISTRY|g" {} \;
+
+      - name: Build and push frontend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t ${ECR_REPO_FRONTEND} ./frontend
+          docker tag ${ECR_REPO_FRONTEND}:latest $ECR_REGISTRY/${ECR_REPO_FRONTEND}:${IMAGE_TAG}
+          docker push $ECR_REGISTRY/${ECR_REPO_FRONTEND}:${IMAGE_TAG}
+
+      - name: Build and push backend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t ${ECR_REPO_BACKEND} ./backend
+          docker tag ${ECR_REPO_BACKEND}:latest $ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG}
+          docker push $ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG}
+
+      - name: Build and push database image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t ${ECR_REPO_DB} ./db
+          docker tag ${ECR_REPO_DB}:latest $ECR_REGISTRY/${ECR_REPO_DB}:${IMAGE_TAG}
+          docker push $ECR_REGISTRY/${ECR_REPO_DB}:${IMAGE_TAG}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.29.0
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+
+      - name: Apply namespace and base manifests
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/mysql-secret.yaml -n "$EKS_NAMESPACE"
+          kubectl apply -f k8s/mysql-deployment.yaml -n "$EKS_NAMESPACE"
+          kubectl apply -f k8s/mysql-service.yaml -n "$EKS_NAMESPACE"
+
+      - name: Update backend deployment
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          kubectl apply -f k8s/backend-deployment.yaml -n "$EKS_NAMESPACE"
+          kubectl apply -f k8s/backend-service.yaml -n "$EKS_NAMESPACE"
+          kubectl set image deployment/despachos-backend backend=$ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG} -n "$EKS_NAMESPACE"
+          kubectl rollout status deployment/despachos-backend -n "$EKS_NAMESPACE"
+
+      - name: Update frontend deployment
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          kubectl apply -f k8s/frontend-deployment.yaml -n "$EKS_NAMESPACE"
+          kubectl apply -f k8s/frontend-service.yaml -n "$EKS_NAMESPACE"
+          kubectl set image deployment/despachos-frontend frontend=$ECR_REGISTRY/${ECR_REPO_FRONTEND}:${IMAGE_TAG} -n "$EKS_NAMESPACE"
+          kubectl rollout status deployment/despachos-frontend -n "$EKS_NAMESPACE"
+
+      - name: Apply HPA manifests
+        run: |
+          if [ -f k8s/backend-hpa.yaml ]; then kubectl apply -f k8s/backend-hpa.yaml -n "$EKS_NAMESPACE"; fi
+          if [ -f k8s/frontend-hpa.yaml ]; then kubectl apply -f k8s/frontend-hpa.yaml -n "$EKS_NAMESPACE"; fi
+
+      - name: Show final status
+        run: |
+          kubectl get pods -n "$EKS_NAMESPACE"
+          kubectl get svc -n "$EKS_NAMESPACE"
+          kubectl get hpa -n "$EKS_NAMESPACE" || true

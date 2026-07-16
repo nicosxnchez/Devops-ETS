@@ -1,0 +1,45 @@
+services:
+  despachos-db:
+    build:
+      context: ./db
+    container_name: despachos-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: despachos_db
+      MYSQL_USER: alumno
+      MYSQL_PASSWORD: alumno123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  despachos-backend:
+    build:
+      context: ./backend
+    container_name: despachos-backend
+    restart: unless-stopped
+    depends_on:
+      - despachos-db
+    environment:
+      DB_HOST: despachos-db
+      DB_USER: root
+      DB_PASSWORD: admin123
+      DB_NAME: despachos_db
+      DB_PORT: 3306
+      PORT: 3001
+    ports:
+      - "3001:3001"
+
+  despachos-frontend:
+    build:
+      context: ./frontend
+    container_name: despachos-frontend
+    restart: unless-stopped
+    depends_on:
+      - despachos-backend
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:
